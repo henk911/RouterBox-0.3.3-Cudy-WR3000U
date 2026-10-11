@@ -174,7 +174,11 @@ func Generate(s Settings, nodes []Node, paths map[string]string, run, secret str
 			rule["outbound"] = groupTag(r.Target)
 		}
 		routeRules = append(routeRules, rule)
-		if r.DNS != "" || r.Target == "block" {
+		resolver := r.DNS
+		if resolver == "" && (s.DirectDNS != "" || s.VPNDNS != "") {
+			resolver = trafficDNS(s, r.Target)
+		}
+		if resolver != "" || r.Target == "block" {
 			dm := Object{}
 			if len(r.Categories) > 0 {
 				tags := []string{}
@@ -213,7 +217,7 @@ func Generate(s Settings, nodes []Node, paths map[string]string, run, secret str
 					dm["action"] = "reject"
 				} else {
 					dm["action"] = "route"
-					dm["server"] = r.DNS
+					dm["server"] = resolver
 				}
 				dnsRules = append(dnsRules, dm)
 			}
@@ -254,5 +258,18 @@ func Generate(s Settings, nodes []Node, paths map[string]string, run, secret str
 	if len(endpoints) > 0 {
 		config["endpoints"] = endpoints
 	}
+	config["dns"].(Object)["final"] = trafficDNS(s, s.Final)
 	return config, nil
+}
+
+// Routing has already expanded VPN rules into their concrete group IDs.
+func trafficDNS(s Settings, target string) string {
+	resolver := s.VPNDNS
+	if target == "direct" || target == "block" {
+		resolver = s.DirectDNS
+	}
+	if resolver == "" {
+		return "dns-default"
+	}
+	return resolver
 }

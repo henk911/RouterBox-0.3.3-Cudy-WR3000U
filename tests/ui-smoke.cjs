@@ -43,3 +43,10 @@ page.ruleDialog({...settings.rules[0],separate_udp:true,udp_nodes:['b']},0);
 assert(ui.modal.children.flatMap(descendants).some(n=>n.tag==='strong'&&n.children.includes('Серверы для UDP')));
 page.showTab('dns');assert(descendants(page.content).some(n=>n.tag==='label'&&labelText(n)==='Таймаут DNS, секунд'));
 console.log('Subscription filters, UDP pool and DNS controls: OK');
+for(const [label,key] of [['DNS для прямого трафика','direct_dns'],['DNS для VPN-групп','vpn_dns']]){
+ const field=descendants(page.content).find(n=>n.tag==='label'&&labelText(n)===label);
+ assert(field,label);
+ const control=field.children.find(n=>n.tag==='select');
+ control.value='cf';control.events.change();assert.equal(page.draft[key],'cf');
+}
+console.log('Independent direct and VPN DNS selectors: OK');

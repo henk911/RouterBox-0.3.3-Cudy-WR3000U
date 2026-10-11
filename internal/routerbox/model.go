@@ -117,6 +117,8 @@ type Settings struct {
 	CoreSize      int64          `json:"core_size,omitempty"`
 	RulesInterval int            `json:"rules_interval"`
 	DNSMode       string         `json:"dns_mode"`
+	DirectDNS     string         `json:"direct_dns,omitempty"`
+	VPNDNS        string         `json:"vpn_dns,omitempty"`
 	DNSStrategy   string         `json:"dns_strategy"`
 	DNSErrorTTL   int            `json:"dns_error_ttl,omitempty"`
 	DNSWinTTL     int            `json:"dns_win_ttl,omitempty"`
@@ -309,6 +311,11 @@ func validate(s Settings) error {
 		}
 		if d.Detour != "" && ((!ids[d.Detour] && d.Detour != "vpn") || d.Detour == "block") {
 			return errors.New("неизвестное направление DNS")
+		}
+	}
+	for _, selected := range []string{s.DirectDNS, s.VPNDNS} {
+		if selected != "" && !dnsIDs[selected] {
+			return errors.New("неизвестный DNS прямого трафика или VPN")
 		}
 	}
 	for _, r := range s.Rules {
