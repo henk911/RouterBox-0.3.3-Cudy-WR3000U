@@ -5,6 +5,46 @@ import (
 	"sort"
 )
 
+// Subscription removal and disabling also remove its saved route selections.
+// Empty pools retain the existing meaning: all enabled subscription servers.
+func removeDisabledSubscriptionSelections(s *Settings, nodes []Node) {
+	enabled := map[string]bool{}
+	for _, p := range s.Subscriptions {
+		enabled[p.ID] = p.Enabled
+	}
+	removed := map[string]bool{}
+	for _, n := range nodes {
+		if !enabled[n.Subscription] {
+			removed[n.ID] = true
+		}
+	}
+	clean := func(ids *[]string, selected, mode *string) {
+		kept := []string{}
+		for _, id := range *ids {
+			if !removed[id] {
+				kept = append(kept, id)
+			}
+		}
+		*ids = kept
+		if removed[*selected] {
+			*selected = ""
+			if *mode == "manual" {
+				*mode = "stable"
+			}
+		}
+	}
+	clean(&s.FinalNodes, &s.FinalSelected, &s.FinalMode)
+	for i := range s.Rules {
+		r := &s.Rules[i]
+		clean(&r.Nodes, &r.Selected, &r.Mode)
+		clean(&r.UDPNodes, &r.UDPSelected, &r.UDPMode)
+	}
+	for i := range s.Groups {
+		g := &s.Groups[i]
+		clean(&g.Nodes, &g.Selected, &g.Mode)
+	}
+}
+
 // Public rules own their server selection; core selectors remain an implementation detail.
 func resolveRouting(s Settings, nodes []Node) (Settings, error) {
 	expanded := []Rule{}

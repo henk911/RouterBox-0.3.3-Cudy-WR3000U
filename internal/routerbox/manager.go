@@ -360,6 +360,7 @@ func (m *Manager) perform(action string, data json.RawMessage) error {
 		if s.CoreURL == "" {
 			s.CoreURL = m.Settings.CoreURL
 		}
+		removeDisabledSubscriptionSelections(&s, m.Nodes)
 		if e := validate(s); e != nil {
 			return e
 		}
