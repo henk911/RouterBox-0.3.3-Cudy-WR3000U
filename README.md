@@ -6,7 +6,15 @@ RouterBox — клиент для OpenWrt с интерфейсом LuCI и яд
 
 > **Форк для Cudy WR3000U.** Это копия [nekl3103/RouterBox](https://github.com/nekl3103/RouterBox) 0.3.3 с добавленным профилем сборки `filogic`: OpenWrt target `mediatek/filogic`, архитектура APK `aarch64_cortex-a53` (MT7981/MT7986, например Cudy WR3000/WR3000U). Изменения описаны в последних коммитах и в разделе [«Профиль MediaTek Filogic»](#профиль-mediatek-filogic). С автором оригинала форк не связан. Лицензия — [GPL-3.0](LICENSE), как у оригинала.
 >
-> Готовый комплект: [`release/routerbox-filogic-0.3.3.tar.gz`](release/routerbox-filogic-0.3.3.tar.gz), SHA256 в [`release/SHA256SUMS`](release/SHA256SUMS). Нужен OpenWrt 25.12+ с APK. Установка такая же, как ниже, с именами `routerbox-filogic-0.3.3.tar.gz` и `routerbox-filogic`:
+> **Установка одной командой** с компьютера (замените адрес, если у роутера другой):
+>
+> ```sh
+> ssh root@192.168.1.1 "wget -qO- https://github.com/henk911/RouterBox-0.3.3-Cudy-WR3000U/raw/main/setup.sh | sh"
+> ```
+>
+> [`setup.sh`](setup.sh) проверяет target и архитектуру роутера, скачивает комплект, сверяет его SHA256 и запускает `install.sh --flash`. Другой режим передаётся так: `... | sh -s -- --disabled` (если работает другой VPN), `--check` (только проверка).
+>
+> Готовый комплект: [`release/routerbox-filogic-0.3.3.tar.gz`](release/routerbox-filogic-0.3.3.tar.gz), SHA256 в [`release/SHA256SUMS`](release/SHA256SUMS). Нужен OpenWrt 25.12+ с APK. Установка вручную такая же, как ниже, с именами `routerbox-filogic-0.3.3.tar.gz` и `routerbox-filogic`:
 >
 > ```sh
 > scp -O routerbox-filogic-0.3.3.tar.gz root@192.168.1.1:/tmp/
