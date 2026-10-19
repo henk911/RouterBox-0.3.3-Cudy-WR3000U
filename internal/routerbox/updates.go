@@ -63,7 +63,7 @@ func releaseInfo(data []byte, current string) (Object, error) {
 		return nil, e
 	}
 	version := strings.TrimPrefix(r.Tag, "v")
-	archive := fmt.Sprintf("routerbox-mt7621-%s.tar.gz", version)
+	archive := fmt.Sprintf("routerbox-%s-%s.tar.gz", Profile, version)
 	ready := false
 	for _, a := range r.Assets {
 		if a.Name == archive {
@@ -71,7 +71,7 @@ func releaseInfo(data []byte, current string) (Object, error) {
 		}
 	}
 	if !ready {
-		return nil, errors.New("в выпуске отсутствует сборка для MT7621")
+		return nil, fmt.Errorf("в выпуске отсутствует сборка для %s", Platform)
 	}
 	return Object{"latest": version, "available": available, "url": "https://github.com/nekl3103/RouterBox/releases/tag/" + r.Tag, "download": "https://github.com/nekl3103/RouterBox/releases/download/" + r.Tag + "/" + archive}, nil
 }

@@ -2,6 +2,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
+. ./scripts/profile.sh
 export GOTOOLCHAIN=go1.26.8
 export GOMODCACHE="$ROOT/build/gomod"
 export GOCACHE="$ROOT/build/gocache"
@@ -18,10 +19,17 @@ fi
 [ "$(git -C build/core-source rev-parse HEAD)" = "$CORE_COMMIT" ] || { echo 'Unexpected core source revision' >&2; exit 1; }
 ./scripts/patch-core.sh
 go mod download
-GOOS=linux GOARCH=mipsle GOMIPS=softfloat go build -trimpath -ldflags '-s -w -buildid=' -o dist/routerbox-mipsle ./cmd/routerbox
+export GOOS=linux GOARCH="$ROUTERBOX_GOARCH"
+case "$GOARCH" in
+ mipsle) export GOMIPS=softfloat ;;
+ arm64) export GOARM64=v8.0 ;;
+esac
+echo "Profile $ROUTERBOX_PROFILE: $ROUTERBOX_TARGET, APK $ROUTERBOX_APK_ARCH, GOARCH=$GOARCH"
+PKG=routerbox/internal/routerbox
+go build -trimpath -ldflags "-s -w -buildid= -X $PKG.Profile=$ROUTERBOX_PROFILE -X '$PKG.Platform=$ROUTERBOX_PLATFORM'" -o "dist/routerbox-$GOARCH" ./cmd/routerbox
 (
  cd build/core-source
- GOOS=linux GOARCH=mipsle GOMIPS=softfloat go build -trimpath -tags "$TAGS" -ldflags '-s -w -buildid= -checklinkname=0 -X github.com/sagernet/sing-box/constant.Version=1.14.2-lx.12-router.1' -o ../../dist/sing-box-mipsle ./cmd/sing-box
+ go build -trimpath -tags "$TAGS" -ldflags '-s -w -buildid= -checklinkname=0 -X github.com/sagernet/sing-box/constant.Version=1.14.2-lx.12-router.1' -o "../../dist/sing-box-$GOARCH" ./cmd/sing-box
 )
 python3 scripts/stage.py
 ./scripts/package-apk.sh

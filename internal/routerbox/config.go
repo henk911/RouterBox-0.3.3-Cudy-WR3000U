@@ -43,7 +43,7 @@ func Generate(s Settings, nodes []Node, paths map[string]string, run, secret str
 		}
 	}
 	if ipTunnels > 2 {
-		return nil, errors.New("профиль MT7621 допускает не более двух активных WireGuard/AmneziaWG/MASQUE туннелей")
+		return nil, fmt.Errorf("профиль %s допускает не более двух активных WireGuard/AmneziaWG/MASQUE туннелей", Platform)
 	}
 	outbounds := []Object{{"type": "direct", "tag": "direct"}, {"type": "socks", "tag": "unavailable", "server": "127.0.0.1", "server_port": 1, "version": "5"}}
 	endpoints := []Object{}

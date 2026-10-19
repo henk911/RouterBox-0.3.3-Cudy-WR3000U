@@ -289,6 +289,18 @@ cd RouterBox
 | `SHA256SUMS` | Контрольные суммы содержимого установочного комплекта |
 | `keys/routerbox.pub` | Публичный ключ APK |
 
+### Профиль MediaTek Filogic
+
+Для роутеров на MT7981/MT7986 (OpenWrt target `mediatek/filogic`, архитектура APK `aarch64_cortex-a53`, например Cudy WR3000/WR3000U) выберите профиль сборки:
+
+```sh
+ROUTERBOX_PROFILE=filogic ./scripts/build.sh
+```
+
+Комплект называется `routerbox-filogic-0.3.3.tar.gz`, распаковывается в `routerbox-filogic/`, архив для RAM — `sing-box-1.14.2-lx.12-filogic.gz`. Установка та же, что для MT7621. `install.sh` сверяет target прошивки и архитектуру APK роутера с `manifest.json` комплекта и останавливается при несовпадении. По умолчанию (`ROUTERBOX_PROFILE=mt7621`) сборка не меняется. Лимиты на число серверов и туннелей одинаковы для обоих профилей.
+
+Без Docker пакеты можно подписать локально собранным apk-tools 3.0.7: `APK_TOOLS_DIR=<каталог с бинарником apk> ./scripts/build.sh`.
+
 Ядро закреплено на commit `a97658c1d122a64b405621a94e1db971f8939f8d` (`v1.14.2-lx.12`). Сборка применяет `patches/sing-tun-32bit-route-table.patch`: случайный номер таблицы маршрутизации остаётся положительным на 32-битном MT7621. Исправленное ядро обозначено `1.14.2-lx.12-router.1`.
 
 Теги: `with_gvisor,with_quic,with_wireguard,with_utls,with_clash_api,with_xhttp,with_awg`. Доступны VLESS/REALITY/XHTTP, VMess, Trojan, Shadowsocks, Hysteria/Hysteria2, TUIC, AnyTLS, WireGuard/AmneziaWG и другие протоколы этой сборки. Tailscale, OpenVPN, OpenConnect и Naive исключены для уменьшения размера. Каждая импортированная запись проверяется ядром.

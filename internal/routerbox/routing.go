@@ -95,7 +95,7 @@ func resolveRouting(s Settings, nodes []Node) (Settings, error) {
 			}
 		}
 		if len(chosen) > 64 {
-			return "", fmt.Errorf("%s: найдено %d серверов; для MT7621 выберите до 64", name, len(chosen))
+			return "", fmt.Errorf("%s: найдено %d серверов; для %s выберите до 64", name, len(chosen), Platform)
 		}
 		s.Groups = append(s.Groups, Group{ID: id, Name: name, Nodes: append([]string{}, chosen...), Mode: mode, Selected: selected, Interval: 300, Timeout: 5, Tolerance: 50, Hold: 300, Failures: 3, Recovery: 2, Window: 30, TestURL: "https://www.gstatic.com/generate_204", Failure: "block"})
 		return id, nil

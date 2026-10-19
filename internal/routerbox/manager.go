@@ -285,7 +285,7 @@ func (m *Manager) publish() {
 			}
 		}
 	}
-	b, _ := json.Marshal(Object{"version": Version, "core_version": CoreVersion, "running": m.process != nil, "settings": s, "nodes": visible, "selections": m.selections, "events": append([]string{}, m.events...), "devices": devices, "traffic": nonNilObject(m.traffic), "connections": m.connections, "updates": nonNilObject(m.updateInfo), "catalogue": catalogue, "storage": Object{"flash_free": freeBytes(m.Root), "ram_free": freeBytes(m.Run), "mem_available": availableMemory(freeBytes(m.Run)), "controller_heap": mem.HeapAlloc}})
+	b, _ := json.Marshal(Object{"version": Version, "core_version": CoreVersion, "platform": Platform, "running": m.process != nil, "settings": s, "nodes": visible, "selections": m.selections, "events": append([]string{}, m.events...), "devices": devices, "traffic": nonNilObject(m.traffic), "connections": m.connections, "updates": nonNilObject(m.updateInfo), "catalogue": catalogue, "storage": Object{"flash_free": freeBytes(m.Root), "ram_free": freeBytes(m.Run), "mem_available": availableMemory(freeBytes(m.Run)), "controller_heap": mem.HeapAlloc}})
 	m.snapshot.Store(b)
 }
 func (m *Manager) State() Object {

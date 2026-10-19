@@ -19,6 +19,11 @@ type Object = map[string]any
 
 const Version = "0.3.3"
 const CoreVersion = "1.14.2-lx.12-router.1"
+
+// Build profile (bundle name in releases) and its display name; build.sh sets
+// both with -ldflags -X. The defaults describe the original MT7621 build.
+var Profile = "mt7621"
+var Platform = "MT7621"
 const MaxDownload = 8 << 20
 
 var validID = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`)
@@ -255,7 +260,7 @@ func validate(s Settings) error {
 			active[id] = true
 		}
 		if len(active) > 64 {
-			return errors.New("для MT7621 допускается не более 64 активных серверов")
+			return fmt.Errorf("для %s допускается не более 64 активных серверов", Platform)
 		}
 		if len(g.Nodes) == 0 || len(g.Nodes) > 64 {
 			return errors.New("группа должна содержать 1–64 сервера")

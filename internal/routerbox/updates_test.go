@@ -41,3 +41,19 @@ func TestReleaseVersionsAndMT7621(t *testing.T) {
 		t.Fatal("missing MT7621 package accepted")
 	}
 }
+
+func TestReleaseInfoFollowsBuildProfile(t *testing.T) {
+	defer func(p, n string) { Profile, Platform = p, n }(Profile, Platform)
+	Profile, Platform = "filogic", "MediaTek Filogic"
+	release := Object{"tag_name": "v0.3.10", "assets": []Object{{"name": "routerbox-mt7621-0.3.10.tar.gz"}}}
+	b, _ := json.Marshal(release)
+	if _, e := releaseInfo(b, "0.3.3"); e == nil {
+		t.Fatal("MT7621 bundle offered to a Filogic build")
+	}
+	release["assets"] = []Object{{"name": "routerbox-filogic-0.3.10.tar.gz"}}
+	b, _ = json.Marshal(release)
+	info, e := releaseInfo(b, "0.3.3")
+	if e != nil || info["download"] != "https://github.com/nekl3103/RouterBox/releases/download/v0.3.10/routerbox-filogic-0.3.10.tar.gz" {
+		t.Fatal(info, e)
+	}
+}

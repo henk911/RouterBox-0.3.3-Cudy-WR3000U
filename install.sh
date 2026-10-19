@@ -7,10 +7,17 @@ case "$MODE" in --flash|--app-only|--check|--disabled) ;; *) echo 'Исполь�
 [ "$(id -u)" = 0 ] || { echo 'Запустите от root' >&2; exit 1; }
 [ -f /etc/openwrt_release ] || { echo 'Это не OpenWrt' >&2; exit 1; }
 . /etc/openwrt_release
-[ "${DISTRIB_TARGET:-}" = ramips/mt7621 ] || { echo 'Пакет предназначен для ramips/mt7621' >&2; exit 1; }
 command -v apk >/dev/null || { echo 'Нужен OpenWrt с APK' >&2; exit 1; }
 command -v jsonfilter >/dev/null || { echo 'Нужен jsonfilter' >&2; exit 1; }
 sha256sum -c SHA256SUMS
+# The bundle's manifest names the OpenWrt target and APK architecture it was built for.
+WANT_TARGET=$(jsonfilter -i manifest.json -e '@.target' 2>/dev/null || true)
+WANT_ARCH=$(jsonfilter -i manifest.json -e '@.arch')
+[ -n "$WANT_TARGET" ] || WANT_TARGET=ramips/mt7621
+[ "${DISTRIB_TARGET:-}" = "$WANT_TARGET" ] || { echo "Пакет предназначен для $WANT_TARGET, а прошивка роутера — ${DISTRIB_TARGET:-неизвестный target}" >&2; exit 1; }
+ARCH=$(apk --print-arch 2>/dev/null || cat /etc/apk/arch 2>/dev/null || true)
+[ "$ARCH" = "$WANT_ARCH" ] || { echo "Пакет собран для архитектуры $WANT_ARCH, а у роутера ${ARCH:-неизвестная}" >&2; exit 1; }
+printf 'Платформа: %s, %s\n' "$WANT_TARGET" "$WANT_ARCH"
 FREE=$(df -Pk /overlay | awk 'NR==2 {printf "%.0f", $4*1024}')
 TMP_FREE=$(df -Pk /tmp | awk 'NR==2 {printf "%.0f", $4*1024}')
 MEM_FREE=$(awk '/^MemAvailable:/ {printf "%.0f", $2*1024}' /proc/meminfo)
