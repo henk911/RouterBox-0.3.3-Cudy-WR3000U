@@ -18,7 +18,7 @@
 main() {
  set -eu
  FILE=routerbox-filogic-0.3.3.tar.gz
- SHA256=9a5a3081c322a214e4ec8db36c159361e0021a3edf6ea414e4e327e370fa1d6d
+ SHA256=2c35ce18f08756d158d0eb3b1bd827ebd4992c9a70d6c9b5ecfd86e259242d15
  URL=${ROUTERBOX_URL:-https://github.com/henk911/RouterBox-0.3.3-Cudy-WR3000U/raw/main/release/$FILE}
  TARGET=mediatek/filogic
  ARCH_WANT=aarch64_cortex-a53
@@ -35,8 +35,14 @@ main() {
  . /etc/openwrt_release
  [ "${DISTRIB_TARGET:-}" = "$TARGET" ] || die "комплект для $TARGET, а прошивка роутера — ${DISTRIB_TARGET:-неизвестный target}"
  command -v apk >/dev/null || die 'нужен OpenWrt 25.12 или новее с менеджером пакетов APK'
- ARCH=$(apk --print-arch 2>/dev/null || cat /etc/apk/arch 2>/dev/null || true)
- [ "$ARCH" = "$ARCH_WANT" ] || die "комплект для архитектуры $ARCH_WANT, а у роутера ${ARCH:-неизвестная}"
+ # OpenWrt lists the package architectures apk accepts in /etc/apk/arch;
+ # apk --print-arch reports only apk-tools' generic build arch (aarch64).
+ if [ -f /etc/apk/arch ]; then
+  ARCHES=$(tr -s ' \t' '\n\n' < /etc/apk/arch)
+  printf '%s\n' "$ARCHES" | grep -qx "$ARCH_WANT" || die "комплект для архитектуры $ARCH_WANT, а роутер принимает: $(echo $ARCHES)"
+ else
+  [ "$(uname -m)" = aarch64 ] || die "комплект для архитектуры $ARCH_WANT, а процессор роутера $(uname -m)"
+ fi
  command -v wget >/dev/null || die 'нет wget (uclient-fetch)'
 
  rm -rf "$WORK"

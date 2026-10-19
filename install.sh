@@ -15,8 +15,16 @@ WANT_TARGET=$(jsonfilter -i manifest.json -e '@.target' 2>/dev/null || true)
 WANT_ARCH=$(jsonfilter -i manifest.json -e '@.arch')
 [ -n "$WANT_TARGET" ] || WANT_TARGET=ramips/mt7621
 [ "${DISTRIB_TARGET:-}" = "$WANT_TARGET" ] || { echo "Пакет предназначен для $WANT_TARGET, а прошивка роутера — ${DISTRIB_TARGET:-неизвестный target}" >&2; exit 1; }
-ARCH=$(apk --print-arch 2>/dev/null || cat /etc/apk/arch 2>/dev/null || true)
-[ "$ARCH" = "$WANT_ARCH" ] || { echo "Пакет собран для архитектуры $WANT_ARCH, а у роутера ${ARCH:-неизвестная}" >&2; exit 1; }
+# OpenWrt lists the package architectures apk accepts in /etc/apk/arch;
+# apk --print-arch reports only apk-tools' generic build arch (aarch64, mipsel).
+if [ -f /etc/apk/arch ]; then
+ ARCHES=$(tr -s ' \t' '\n\n' < /etc/apk/arch)
+ printf '%s\n' "$ARCHES" | grep -qx "$WANT_ARCH" || { echo "Пакет собран для архитектуры $WANT_ARCH, а роутер принимает: $(echo $ARCHES)" >&2; exit 1; }
+else
+ case "$WANT_ARCH" in aarch64_*) BASE=aarch64;; mipsel_*) BASE=mips;; *) BASE=;; esac
+ MACHINE=$(uname -m)
+ [ -n "$BASE" ] && [ "$MACHINE" = "$BASE" ] || { echo "Пакет собран для архитектуры $WANT_ARCH, а процессор роутера $MACHINE" >&2; exit 1; }
+fi
 printf 'Платформа: %s, %s\n' "$WANT_TARGET" "$WANT_ARCH"
 FREE=$(df -Pk /overlay | awk 'NR==2 {printf "%.0f", $4*1024}')
 TMP_FREE=$(df -Pk /tmp | awk 'NR==2 {printf "%.0f", $4*1024}')
