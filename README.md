@@ -4,6 +4,19 @@
 
 RouterBox — клиент для OpenWrt с интерфейсом LuCI и ядром [sing-box-lx](https://github.com/Leadaxe/sing-box-lx). Он загружает подписки, проверяет совместимость серверов и направляет выбранные сайты, сервисы и устройства через VPN или напрямую.
 
+> **Форк для Cudy WR3000U.** Это копия [nekl3103/RouterBox](https://github.com/nekl3103/RouterBox) 0.3.3 с добавленным профилем сборки `filogic`: OpenWrt target `mediatek/filogic`, архитектура APK `aarch64_cortex-a53` (MT7981/MT7986, например Cudy WR3000/WR3000U). Изменения описаны в последних коммитах и в разделе [«Профиль MediaTek Filogic»](#профиль-mediatek-filogic). С автором оригинала форк не связан. Лицензия — [GPL-3.0](LICENSE), как у оригинала.
+>
+> Готовый комплект: [`release/routerbox-filogic-0.3.3.tar.gz`](release/routerbox-filogic-0.3.3.tar.gz), SHA256 в [`release/SHA256SUMS`](release/SHA256SUMS). Нужен OpenWrt 25.12+ с APK. Установка такая же, как ниже, с именами `routerbox-filogic-0.3.3.tar.gz` и `routerbox-filogic`:
+>
+> ```sh
+> scp -O routerbox-filogic-0.3.3.tar.gz root@192.168.1.1:/tmp/
+> ssh root@192.168.1.1
+> cd /tmp && tar -xzf routerbox-filogic-0.3.3.tar.gz && cd routerbox-filogic
+> ./install.sh --check && ./install.sh --flash
+> ```
+>
+> Сборка проверена без физического роутера: архитектура ELF, подписи APK, контрольные суммы, проверки установщика на имитации и тесты проекта с настоящим ядром на x86_64. Запуск на самом WR3000U не проверялся. Вкладка «Обновление» ищет сборки Filogic в релизах автора и не найдёт их; новые версии собирайте командой `ROUTERBOX_PROFILE=filogic ./scripts/build.sh`.
+
 **[Скачать сборку](https://github.com/nekl3103/RouterBox/releases/latest) · [Пошаговая инструкция](docs/INSTALL.md) · [Сборки GitHub Actions](https://github.com/nekl3103/RouterBox/actions/workflows/build.yml)**
 
 ## Поддерживаемая платформа
