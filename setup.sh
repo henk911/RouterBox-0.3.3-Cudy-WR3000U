@@ -45,6 +45,19 @@ main() {
  fi
  command -v wget >/dev/null || die 'нет wget (uclient-fetch)'
 
+ # install.sh reserves /tmp (RAM) for unpacking the core: core + controller
+ # + 24 MiB from this bundle's manifest.json. The bundle itself needs about
+ # 36 MB while unpacking, so put it on flash when it would eat into that.
+ TMP_NEED=75759868
+ FLASH_NEED=26190309
+ BUNDLE_ROOM=$((40*1024*1024))
+ TMP_FREE=$(free_bytes /tmp); TMP_FREE=${TMP_FREE:-0}
+ FLASH_FREE=$(free_bytes /overlay); FLASH_FREE=${FLASH_FREE:-0}
+ if [ "$MODE" != --disabled ] && [ "$TMP_FREE" -lt $((TMP_NEED + BUNDLE_ROOM)) ] && [ "$FLASH_FREE" -ge $((FLASH_NEED + BUNDLE_ROOM)) ]; then
+  WORK=/root/routerbox-setup
+  echo "В /tmp мало места, комплект временно распаковывается во flash: $WORK"
+ fi
+
  rm -rf "$WORK"
  mkdir -p "$WORK"
  trap 'rm -rf "$WORK"' EXIT INT TERM
@@ -73,5 +86,6 @@ main() {
 }
 
 die() { echo "RouterBox: $*" >&2; exit 1; }
+free_bytes() { df -Pk "$1" 2>/dev/null | awk 'NR==2 {printf "%.0f", $4*1024}' || true; }
 
 main "$@"
