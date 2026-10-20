@@ -4,7 +4,7 @@ root=pathlib.Path(__file__).resolve().parent.parent
 dist=root/'dist'
 profile=os.environ.get('ROUTERBOX_PROFILE','mt7621')
 bundle='routerbox-%s' % profile
-files=['luci-app-routerbox-0.3.3-r1.apk','routerbox-core-1.14.2-r13.apk','keys/routerbox.pub','manifest.json','install.sh','README.ru.md','INSTALL.ru.md']
+files=['luci-app-routerbox-0.3.3-r2.apk','routerbox-core-1.14.2-r13.apk','keys/routerbox.pub','manifest.json','install.sh','README.ru.md','INSTALL.ru.md']
 shutil.copyfile(root/'install.sh',dist/'install.sh')
 # Commands in the bundled instructions refer to this bundle's own file names.
 manifest=json.loads((dist/'manifest.json').read_text())

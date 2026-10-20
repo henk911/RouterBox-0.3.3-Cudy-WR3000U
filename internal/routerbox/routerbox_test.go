@@ -67,9 +67,11 @@ func TestSubscriptionFormats(t *testing.T) {
 	if _, ok := nodes[0].Config["bind_interface"]; ok {
 		t.Fatal("injected interface")
 	}
-	_, bad, e = ParseSubscription([]byte("vless://id@example.com:443?security=reality&pqv=unsupported"), "sub")
-	if e != nil || len(bad) != 1 {
-		t.Fatal("unsupported extension imported")
+	// pqv (Xray ML-DSA-65 verify key) has no sing-box counterpart and is not
+	// needed to connect: it is dropped, the REALITY public key still applies.
+	nodes, bad, e = ParseSubscription([]byte("vless://id@example.com:443?security=reality&pbk=key&pqv=unsupported"), "sub")
+	if b, _ := json.Marshal(nodes); e != nil || len(bad) != 0 || len(nodes) != 1 || strings.Contains(string(b), "unsupported") {
+		t.Fatal("pqv not dropped", e, bad, string(b))
 	}
 }
 func TestShadowsocksIPv6AndVMess(t *testing.T) {

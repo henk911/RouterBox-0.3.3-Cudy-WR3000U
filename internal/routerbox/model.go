@@ -24,6 +24,7 @@ const CoreVersion = "1.14.2-lx.12-router.1"
 // both with -ldflags -X. The defaults describe the original MT7621 build.
 var Profile = "mt7621"
 var Platform = "MT7621"
+
 const MaxDownload = 8 << 20
 
 var validID = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`)

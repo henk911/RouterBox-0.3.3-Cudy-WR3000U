@@ -9,10 +9,10 @@ if [ ! -f build/routerbox-private.pem ]; then
 fi
 openssl rsa -in build/routerbox-private.pem -pubout -out dist/keys/routerbox.pub
 PACKAGE='
- apk mkpkg --compat 3.0.0 --compression deflate:9 --sign-key build/routerbox-private.pem --files build/stage-app --info name:luci-app-routerbox --info version:0.3.3-r1 --info arch:"$ROUTERBOX_APK_ARCH" --info license:GPL-3.0-or-later --info description:"RouterBox LuCI subscriptions, DNS and routing" --info depends:"luci-base rpcd jsonfilter ca-bundle kmod-tun kmod-nft-nat kmod-nft-queue ip-full nftables-json" --script post-install:scripts/post-install --script pre-deinstall:scripts/pre-deinstall --output dist/luci-app-routerbox-0.3.3-r1.apk
+ apk mkpkg --compat 3.0.0 --compression deflate:9 --sign-key build/routerbox-private.pem --files build/stage-app --info name:luci-app-routerbox --info version:0.3.3-r2 --info arch:"$ROUTERBOX_APK_ARCH" --info license:GPL-3.0-or-later --info description:"RouterBox LuCI subscriptions, DNS and routing" --info depends:"luci-base rpcd jsonfilter ca-bundle kmod-tun kmod-nft-nat kmod-nft-queue ip-full nftables-json" --script post-install:scripts/post-install --script pre-deinstall:scripts/pre-deinstall --output dist/luci-app-routerbox-0.3.3-r2.apk
  apk mkpkg --compat 3.0.0 --compression deflate:9 --sign-key build/routerbox-private.pem --files build/stage-core --info name:routerbox-core --info version:1.14.2-r13 --info arch:"$ROUTERBOX_APK_ARCH" --info license:GPL-3.0-or-later --info description:"Compressed sing-box-lx client core for $ROUTERBOX_PLATFORM" --output dist/routerbox-core-1.14.2-r13.apk
- apk --keys-dir "$PWD/dist/keys" verify dist/luci-app-routerbox-0.3.3-r1.apk dist/routerbox-core-1.14.2-r13.apk
- apk adbdump dist/luci-app-routerbox-0.3.3-r1.apk > build/app-package-metadata.txt
+ apk --keys-dir "$PWD/dist/keys" verify dist/luci-app-routerbox-0.3.3-r2.apk dist/routerbox-core-1.14.2-r13.apk
+ apk adbdump dist/luci-app-routerbox-0.3.3-r2.apk > build/app-package-metadata.txt
  apk adbdump dist/routerbox-core-1.14.2-r13.apk > build/core-package-metadata.txt
 '
 if [ -n "${APK_TOOLS_DIR:-}" ]; then

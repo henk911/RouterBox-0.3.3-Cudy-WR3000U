@@ -3,10 +3,12 @@ package routerbox
 import (
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"net"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -291,10 +293,17 @@ func parseLink(raw string) (Object, string, error) {
 			q.Set("security", "tls")
 		}
 	}
-	for _, key := range []string{"pqv", "spx", "spiderX", "ech"} {
-		if q.Get(key) != "" {
-			return nil, name, fmt.Errorf("параметр %s не поддерживается этим импортом", key)
-		}
+	// pqv (REALITY ML-DSA-65 verify key) and spx/spiderX are Xray-only client
+	// extras with no sing-box counterpart. Without pqv the server is still
+	// authenticated by the REALITY public key (pbk); spiderX only shapes
+	// requests after a failed REALITY handshake. Neither is needed to connect.
+	for _, key := range []string{"pqv", "spx", "spiderX"} {
+		q.Del(key)
+	}
+	if typ == "hysteria" || typ == "hysteria2" || typ == "tuic" {
+		// QUIC protocols cannot use uTLS: the core accepts the config but
+		// fails every connection with "unsupported usage for uTLS".
+		q.Del("fp")
 	}
 	if e = linkTransport(o, q); e != nil {
 		return nil, name, e
@@ -331,6 +340,14 @@ func linkTransport(o Object, q url.Values) error {
 		}
 		if q.Get("fp") != "" {
 			tls["utls"] = Object{"enabled": true, "fingerprint": q.Get("fp")}
+		}
+		// REALITY conflicts with ECH in the core; Xray ignores ech there too.
+		if v := q.Get("ech"); v != "" && sec == "tls" {
+			ech, e := echOption(v)
+			if e != nil {
+				return e
+			}
+			tls["ech"] = ech
 		}
 		if sec == "reality" {
 			r := Object{"enabled": true, "public_key": q.Get("pbk"), "short_id": q.Get("sid")}
@@ -384,6 +401,24 @@ func linkTransport(o Object, q url.Values) error {
 		return errors.New("транспорт ссылки не поддерживается")
 	}
 	return nil
+}
+
+var echQueryName = regexp.MustCompile(`^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$`)
+
+// echOption converts a share-link ech value (Xray, 3x-ui): a Base64
+// ECHConfigList becomes an inline "ECH CONFIGS" PEM; "domain" or
+// "domain+dns-server" asks the core to fetch the config from the domain's
+// HTTPS DNS record through RouterBox DNS.
+func echOption(v string) (Object, error) {
+	v = strings.TrimSpace(v)
+	if b, e := unbase(v); e == nil && len(b) > 4 && int(b[0])<<8|int(b[1]) == len(b)-2 {
+		block := strings.TrimSpace(string(pem.EncodeToMemory(&pem.Block{Type: "ECH CONFIGS", Bytes: b})))
+		return Object{"enabled": true, "config": []string{block}}, nil
+	}
+	if host, _, _ := strings.Cut(v, "+"); echQueryName.MatchString(host) {
+		return Object{"enabled": true, "query_server_name": host}, nil
+	}
+	return nil, errors.New("некорректный параметр ech")
 }
 func parseSS(raw string) (Object, string, error) {
 	u, e := url.Parse(raw)
@@ -476,7 +511,8 @@ func clashNode(c Object) (Object, error) {
 		if v, ok := c["alpn"]; ok {
 			tls["alpn"] = v
 		}
-		if fp := str(c, "client-fingerprint"); fp != "" {
+		// QUIC protocols cannot use uTLS (see parseLink).
+		if fp := str(c, "client-fingerprint"); fp != "" && typ != "hysteria2" && typ != "tuic" {
 			tls["utls"] = Object{"enabled": true, "fingerprint": fp}
 		}
 		if r, ok := c["reality-opts"].(map[string]any); ok {

@@ -18,7 +18,7 @@
 main() {
  set -eu
  FILE=routerbox-filogic-0.3.3.tar.gz
- SHA256=2c35ce18f08756d158d0eb3b1bd827ebd4992c9a70d6c9b5ecfd86e259242d15
+ SHA256=2d885d8807625dfca024ef2ff06208458f47666f4b66164d471f4979a88ab7eb
  URL=${ROUTERBOX_URL:-https://github.com/henk911/RouterBox-0.3.3-Cudy-WR3000U/raw/main/release/$FILE}
  TARGET=mediatek/filogic
  ARCH_WANT=aarch64_cortex-a53
@@ -49,7 +49,7 @@ main() {
  # + 24 MiB from this bundle's manifest.json. The bundle itself needs about
  # 36 MB while unpacking, so put it on flash when it would eat into that.
  TMP_NEED=75759868
- FLASH_NEED=26190309
+ FLASH_NEED=26194974
  BUNDLE_ROOM=$((40*1024*1024))
  TMP_FREE=$(free_bytes /tmp); TMP_FREE=${TMP_FREE:-0}
  FLASH_FREE=$(free_bytes /overlay); FLASH_FREE=${FLASH_FREE:-0}

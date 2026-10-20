@@ -118,6 +118,9 @@ func xrayVLESS(x Object) (Object, error) {
 	if tls["allowInsecure"] == true {
 		q.Set("insecure", "true")
 	}
+	if ech := str(tls, "echConfigList"); ech != "" {
+		q.Set("ech", ech)
+	}
 	if alpn, ok := tls["alpn"].([]any); ok {
 		a := []string{}
 		for _, v := range alpn {
